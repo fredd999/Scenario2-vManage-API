@@ -32,7 +32,7 @@ class SdwanAPIOBJ:
 
     def logout(self):
         url = "https://%s:8444/logout.html" % self.vmanage_ip
-        return "Your session was closed", 401
+        return "Successfully logged out of vManage", 401
 
 
 
@@ -42,6 +42,7 @@ vmanage_pass = getpass.getpass("Please enter vManage password: ")
 vmanage = SdwanAPIOBJ(vmanage_ip, vmanage_user, vmanage_pass)
 device_list = json.loads(vmanage.get_request("dataservice/device"))
 vmanage_logout = vmanage.logout()
+print(vmanage_logout)
 
 data_header = device_list['data']
 device_file = open('device_file.csv', 'w')
