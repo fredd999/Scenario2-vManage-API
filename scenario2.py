@@ -41,7 +41,7 @@ vmanage_user = input("Please enter vManage username: ")
 vmanage_pass = getpass.getpass("Please enter vManage password: ")
 vmanage = SdwanAPIOBJ(vmanage_ip, vmanage_user, vmanage_pass)
 device_list = json.loads(vmanage.get_request("dataservice/device"))
-vmanage_logout = SdwanAPIOBJ.logout()
+vmanage_logout = vmanage.logout()
 
 data_header = device_list['data']
 device_file = open('device_file.csv', 'w')
