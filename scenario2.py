@@ -1,3 +1,4 @@
+import configparser
 from IPython.display import display
 import pandas as pd
 import requests
@@ -37,20 +38,29 @@ class SdwanAPIOBJ:
         return "Successfully logged out of vManage", 401
 
 
-vmanage_ip = input("Please enter vManage IP: ")
-vmanage_user = input("Please enter vManage username: ")
-vmanage_pass = getpass.getpass("Please enter vManage password: ")
-vmanage = SdwanAPIOBJ(vmanage_ip, vmanage_user, vmanage_pass)
+print("Viptela vManage Engine Starting...\n")
+
+# Open up the configuration file and get all application defaults
+try:
+    config = configparser.ConfigParser()
+    config.read('package_config.ini')
+    vmanage_ip = config.get("application", "serveraddress")
+    username = config.get("application", "username")
+    password = config.get("application", "password")
+except configparser.Error:
+    print("Cannot Parse package_config.ini")
+    exit(-1)
+
+vmanage = SdwanAPIOBJ(vmanage_ip, username, password)
 device_list = json.loads(vmanage.get_request("dataservice/device"))
 vmanage_logout = vmanage.logout()
 table_onscreen = pd.json_normalize(device_list, record_path=['data'])
-print("***"* 80)
-print("Device list pulled from vManage:" )
-print("***"* 30)
+print("***" * 80)
+print("Device list pulled from vManage:")
+print("***" * 30)
 print(table_onscreen)
 
 table_onscreen.to_csv('device_file.csv', index=False)
-
 
 print("***********************************************************************************************************")
 print("CSV File Generated")
