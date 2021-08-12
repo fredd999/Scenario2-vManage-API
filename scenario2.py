@@ -49,22 +49,8 @@ print("Device list pulled from vManage:" )
 print("***"* 30)
 print(table_onscreen)
 
-data_header = device_list['data']
-device_file = open('device_file.csv', 'w')
+table_onscreen.to_csv('device_file.csv', index=False)
 
-csv_writer = csv.writer(device_file)
-
-count = 0
-
-for device in data_header:
-    if count == 0:
-        header = device.keys()
-        csv_writer.writerow(header)
-        count += 1
-
-    csv_writer.writerow(device.values())
-
-device_file.close()
 
 print("***********************************************************************************************************")
 print("CSV File Generated")
