@@ -1,3 +1,5 @@
+from IPython.display import display
+import pandas as pd
 import requests
 from requests import session
 import json
@@ -15,7 +17,7 @@ class SdwanAPIOBJ:
         self.authenticate(self.vmanage_ip, username, password)
 
     def authenticate(self, vmanage_ip, username, password):
-        base_url_str = 'https://%s:8444/' % vmanage_ip
+        base_url_str = 'https://{}:8444/'.format(vmanage_ip)
         login_action = '/j_security_check'
         login_data = {'j_username': username, 'j_password': password}
         login_url = base_url_str + login_action
@@ -25,15 +27,14 @@ class SdwanAPIOBJ:
         self.session[vmanage_ip] = sess
 
     def get_request(self, mount_point):
-        url = "https://%s:8444/%s" % (self.vmanage_ip, mount_point)
+        url = "https://{0}:8444/{1}".format(self.vmanage_ip, mount_point)
         response = self.session[self.vmanage_ip].get(url, verify=False)
         data = response.content
         return data
 
     def logout(self):
-        url = "https://%s:8444/logout.html" % self.vmanage_ip
+        url = "https://{}:8444/logout.html".format(self.vmanage_ip)
         return "Successfully logged out of vManage", 401
-
 
 
 vmanage_ip = input("Please enter vManage IP: ")
@@ -42,7 +43,11 @@ vmanage_pass = getpass.getpass("Please enter vManage password: ")
 vmanage = SdwanAPIOBJ(vmanage_ip, vmanage_user, vmanage_pass)
 device_list = json.loads(vmanage.get_request("dataservice/device"))
 vmanage_logout = vmanage.logout()
-
+table_onscreen = pd.json_normalize(device_list, record_path=['data'])
+print("***"* 80)
+print("Device list pulled from vManage:" )
+print("***"* 30)
+print(table_onscreen)
 
 data_header = device_list['data']
 device_file = open('device_file.csv', 'w')
@@ -60,7 +65,6 @@ for device in data_header:
     csv_writer.writerow(device.values())
 
 device_file.close()
-
 
 print("***********************************************************************************************************")
 print("CSV File Generated")
