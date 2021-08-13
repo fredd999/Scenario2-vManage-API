@@ -9,25 +9,28 @@ import getpass
 import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+vManage_ip = {""}
+username = {""}
+password = {""}
 
 
 class SdwanAPIOBJ:
-    def __init__(self, vmanage_ip, username, password):
-        self.vmanage_ip = vmanage_ip
+    def __init__(self):
+        self.vmanage_ip = vManage_ip
         self.session = {}
-        self.authenticate(self.vmanage_ip, username, password)
+        self.authenticate()
 
-    def authenticate(self, vmanage_ip, username, password):
-        base_url_str = 'https://{}:8444/'.format(vmanage_ip)
+    def authenticate(self):
+        base_url_str = 'https://{}:8444/'.format(vManage_ip)
         login_action = '/j_security_check'
         login_data = {'j_username': username, 'j_password': password}
         login_url = base_url_str + login_action
         url = login_url
         sess = requests.session()
         login_response = sess.post(url=login_url, data=login_data, verify=False)
-        self.session[vmanage_ip] = sess
+        self.session[vManage_ip] = sess
 
-    def get_request(self, mount_point):
+    def get_device_list(self, mount_point):
         url = "https://{0}:8444/{1}".format(self.vmanage_ip, mount_point)
         response = self.session[self.vmanage_ip].get(url, verify=False)
         data = response.content
@@ -44,16 +47,16 @@ print("Viptela vManage Engine Starting...\n")
 try:
     config = configparser.ConfigParser()
     config.read('package_config.ini')
-    vmanage_ip = config.get("application", "serveraddress")
+    vManage_ip = config.get("application", "serveraddress")
     username = config.get("application", "username")
     password = config.get("application", "password")
 except configparser.Error:
     print("Cannot Parse package_config.ini")
     exit(-1)
 
-vmanage = SdwanAPIOBJ(vmanage_ip, username, password)
-device_list = json.loads(vmanage.get_request("dataservice/device"))
-vmanage_logout = vmanage.logout()
+vManage = SdwanAPIOBJ()
+device_list = json.loads(vManage.get_device_list("dataservice/device"))
+vManage_logout = vManage.logout()
 table_onscreen = pd.json_normalize(device_list, record_path=['data'])
 print("***" * 80)
 print("Device list pulled from vManage:")
@@ -65,4 +68,4 @@ table_onscreen.to_csv('device_file.csv', index=False)
 print("***********************************************************************************************************")
 print("CSV File Generated")
 print("***********************************************************************************************************")
-print(vmanage_logout)
+print(vManage_logout)
